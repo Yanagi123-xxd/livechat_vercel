@@ -1,6 +1,12 @@
+export const config = {
+  api: {
+    bodyParser: false, // ❌ jangan parse otomatis
+  },
+};
+
 export default async function handler(req, res) {
   try {
-    // 🧠 Tambahkan header CORS
+    // 🧠 Header CORS
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -10,7 +16,11 @@ export default async function handler(req, res) {
       return res.status(200).end();
     }
 
-    const data = req.body;
+    // 🧩 Parse body JSON manual
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const bodyString = Buffer.concat(chunks).toString();
+    const data = JSON.parse(bodyString || "{}");
 
     // pastikan pesan ada
     if (!data.message || !data.message.text) return res.status(200).end();
