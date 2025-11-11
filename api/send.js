@@ -1,11 +1,20 @@
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // 🧠 tambahkan ini dulu
+  // Izinkan semua origin & method untuk preflight (CORS)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method not allowed" });
 
   const { text, session } = req.body;
   const BOT_TOKEN = process.env.BOT_TOKEN;
-  const CHAT_ID = process.env.CHAT_ID; // chat admin (misal ID kamu atau grup)
+  const CHAT_ID = process.env.CHAT_ID;
 
   if (!text || !session)
     return res.status(400).json({ error: "Missing text or session" });
