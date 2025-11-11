@@ -85,7 +85,7 @@
   };
 
   // Stream balasan (real-time)
-  const evt = new EventSource(`${API_BASE}/api/stream?session=${session}`);
+  const evt = new EventSource(`${API_BASE}/api/stream.js?session=${session}`);
   evt.onmessage = (e) => {
     const data = JSON.parse(e.data);
     chat.innerHTML += `<div style="color:blue"><b>Admin:</b> ${data.text}</div>`;
