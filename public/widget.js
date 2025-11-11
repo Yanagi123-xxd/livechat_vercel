@@ -1,4 +1,7 @@
 (function() {
+  // 🧭 BASE URL backend kamu di Vercel
+  const API_BASE = "https://livechat-vercel.vercel.app";
+
   // Buat bubble
   const bubble = document.createElement('div');
   bubble.id = 'chat-bubble';
@@ -61,21 +64,28 @@
     chatBox.style.display = visible ? 'none' : 'flex';
   };
 
+  // Kirim pesan
   sendBtn.onclick = async () => {
     const text = input.value.trim();
     if (!text) return;
     chat.innerHTML += `<div><b>Anda:</b> ${text}</div>`;
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
-    await fetch('/api/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, session })
-    });
+
+    try {
+      const res = await fetch(`${API_BASE}/api/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, session })
+      });
+      if (!res.ok) console.error("Gagal kirim pesan:", res.statusText);
+    } catch (err) {
+      console.error("Network error:", err);
+    }
   };
 
-  // Stream balasan
-  const evt = new EventSource(`/api/stream?session=${session}`);
+  // Stream balasan (real-time)
+  const evt = new EventSource(`${API_BASE}/api/stream?session=${session}`);
   evt.onmessage = (e) => {
     const data = JSON.parse(e.data);
     chat.innerHTML += `<div style="color:blue"><b>Admin:</b> ${data.text}</div>`;
