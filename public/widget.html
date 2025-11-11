@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Livechat</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #fafafa;
+        margin: 0;
+      }
+      #chat {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 8px;
+      }
+      #msg {
+        width: 80%;
+        padding: 6px;
+      }
+      #send {
+        padding: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat"></div>
+    <form id="form">
+      <input id="msg" autocomplete="off" placeholder="Tulis pesan..." />
+      <button id="send">Kirim</button>
+    </form>
+
+    <script>
+      const session =
+        localStorage.getItem("session") || Math.random().toString(36).slice(2);
+      localStorage.setItem("session", session);
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("form");
+      const msg = document.getElementById("msg");
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = msg.value.trim();
+        if (!text) return;
+        chat.innerHTML += `<div><b>Anda:</b> ${text}</div>`;
+        msg.value = "";
+        await fetch("/api/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, session }),
+        });
+      };
+
+      const evt = new EventSource(`/api/stream?session=${session}`);
+      evt.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        chat.innerHTML += `<div style="color:blue"><b>Admin:</b> ${data.text}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      };
+    </script>
+  </body>
+</html>
